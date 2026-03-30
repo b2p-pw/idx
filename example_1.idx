@@ -1,0 +1,73 @@
+# Instruction Definition eXchange (IDX) [shellscript]
+
+@IDX_VERSION = 1.0
+@IDX_SCOPE = [package]
+@PACKAGE = my-package
+@VERSION = 1.0.0
+@TARGET = b2p
+@KERNEL = windows-nt
+
+driver: TERMINAL = term
+driver: SYSTEM = sys
+driver: STRING = str
+driver: MATH = math
+driver: B2P = b2p
+driver: WINDOWS_NT = win
+driver: CURL = net
+
+import: ./scripts/db_setup.idx; db
+
+cons: BIN_URL = "https://repo.com/app.zip"
+cons: CFG_URL = "https://repo.com/setup.conf"
+
+.main:
+    on_error: .error(code: ${idx:last_exit_code})
+
+    var: plugins = ["auth.dll", "logs.dll", "api.dll"]
+    var: env_name
+    var: app_version
+
+    db.setup(db_name: "users_db", port: 5432)
+
+    call: .extract(url: ${BIN_URL})
+
+    if: sys.get_env(ENV) != "production"
+        then:
+             var: env_name = "dev"
+        else:
+            var: env_name = "prod"
+
+    win.check_version(path: "${b2p:BIN}/app.exe") | ${app_version}
+        match: ${idx:last_exit_code} {
+            0:
+                term.print("Sucesso!")
+            1:
+                term.print("Erro: Binário corrompido")
+                error: .error
+            5:
+                term.print("Erro: Requer privilégios de Admin")
+                error: .error
+            *:
+                term.print("Erro desconhecido: ${idx:last_exit_code}")
+                error: .error
+
+    term.print("Versão detectada: ${app_version}")
+
+    win.write("Config: 'Value'") > "${b2p:conf}/${env_name}/settings.ini"
+    win.permission(path: "${b2p:conf}/${env_name}/config.ini", mode: "read-only")
+
+    for: plugin in plugins
+        then:
+            win.copy(from: "${win:TEMP}/${plugin}", to: "${b2p:bin}/plugins/${plugin}")
+
+    call: ./notifier.idx; .send_email
+
+.extract(url):
+    net.download(url: ${url}, target: "${win:TEMP}/app.zip")
+    win.extract(file: "${win:TEMP}/app.zip", dest: "${win:TEMP}")
+    win.copy(from: "${win:TEMP}/app.exe", to: "${b2p:bin}/app.exe")
+    return: 0
+
+.error(code):
+    win.write("Erro código: ${code}; Pacote ${PACKAGE}") >> "${b2p:log}/error.log"
+    stop: 1
