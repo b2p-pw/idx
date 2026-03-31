@@ -1,10 +1,13 @@
-// Instruction Definition eXchange (IDX) [csharp]
+// Instruction Definition eXchange (IDX) [C#]
 
-@IDX_VERSION = 2.0
+@IDX_VERSION = 1.1
 @IDX_SCOPE = [package]
-@PACKAGE = my-package
-@VERSION = 1.0.0
-@KERNEL = windows-nt
+
+@PACKAGE = "my-package"
+@RECIPE_VERSION = "1.0.0"
+@B2P_REQUIREMENT = ">=1.0.0"
+@TARGET = "b2p"
+@KERNEL = "windows-nt"
 
 resource [term, sys, win, net]
 

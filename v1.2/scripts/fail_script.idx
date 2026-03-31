@@ -1,0 +1,33 @@
+# Instruction Definition eXchange (IDX) [CoffeScript]
+# fail_script.idx - Script de recuperação para falhas críticas
+
+idx: 1.2
+allow: [term, sys, net] # Herdado do script que fez a chamada.
+on_fail: fail_handler
+
+term.print red "Executando protocolo de recuperação para: {package}"
+term.print "Causa da falha: {cause.message} no comando {cause.command}"
+
+sys.delete "{sys.TEMP}/app.zip"
+db.rollback
+
+net.post "https://telemetry.com/report":
+    data:
+        package: "{package}"
+        error: {cause}
+    idx: [{idx.version}, {sys.version}]
+
+    ### json
+    {
+        "data": {
+            "package": "my-package"
+            "error": 3
+        }
+        "idx": [3.2, 10.158.56]
+    }
+    ###
+
+fn fail_handler:
+    term.print nl red "Até a recuperação falhou. Abortando sistema."
+    term.print red "Erro: {err.message}"
+    exit 1

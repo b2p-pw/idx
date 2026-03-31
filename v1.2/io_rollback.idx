@@ -1,0 +1,34 @@
+# Instruction Definition eXchange (IDX) [CoffeScript]
+# io_rollback.idx - Script de rollback para falhas de I/O durante a instalação do "my-package"
+
+idx: 1.2
+allow: [term, sys]
+on_fail: fail_handler
+
+term.print yellow "Iniciando Rollback de I/O..."
+
+if sys.exists "{b2p.bin}/app.exe":
+    term.print "Removendo binário incompleto..."
+    sys.delete "{b2p.bin}/app.exe"
+
+if sys.exists "{b2p.bin}/plugins/":
+    term.print "Limpando diretório de plugins..."
+    sys.delete "{b2p.bin}/plugins/*.dll"
+
+env_type = "prod" if {sys.env} == "production" else "dev"
+ini_path = "{b2p.conf}/{env_type}/settings.ini"
+
+if sys.exists {ini_path}:
+    term.print "Removendo arquivo de configuração instável..."
+    sys.delete {ini_path}
+
+term.print "Limpando arquivos temporários de instalação..."
+sys.delete "{sys.TEMP}/app.zip"
+
+term.print green "Rollback de I/O finalizado com sucesso."
+
+fn fail_handler:
+    term.print nl red "FALHA CRÍTICA NO ROLLBACK!"
+    term.print red "O sistema pode estar em estado inconsistente."
+    term.print red "Rollback Incompleto: {err.message}"
+    exit 1
