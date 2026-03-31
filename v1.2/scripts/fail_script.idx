@@ -12,20 +12,15 @@ sys.delete "{sys.TEMP}/app.zip"
 db.rollback
 
 net.post "https://telemetry.com/report":
-    data:
-        package: "{package}"
-        error: {cause}
-    idx: [{idx.version}, {sys.version}]
-
-    ### json
+    json: """
     {
         "data": {
-            "package": "my-package"
-            "error": 3
+            "package": "{package}"
+            "error": {cause}
         }
-        "idx": [3.2, 10.158.56]
+        "idx": [{idx.version}, {sys.version}]
     }
-    ###
+    """
 
 fn fail_handler:
     term.print nl red "Até a recuperação falhou. Abortando sistema."
