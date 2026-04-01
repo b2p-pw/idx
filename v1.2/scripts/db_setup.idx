@@ -1,36 +1,35 @@
 # Instruction Definition eXchange (IDX) [CoffeScript]
 # db_setup.idx - Script de configuração do banco de dados
 
-idx: 1.2
-allow: [term, sys, net]
+idx   = 1.2
+allow = term, sys, net
+
 on_fail: recovery
 
 fn setup name, port:
-    db_name = {name}
-    db_port = {port}
-    
-    term.print "Iniciando configuração do DB: " cyan "{db_name}" reset " na porta " cyan "{db_port}"
+    term.print "Iniciando configuração do DB: " cyan "{name}" reset " na porta " cyan "{port}"
     
     match sys.check_service "postgresql":
-        {res} == "running" => 
+        {res} == "running": 
             term.print green "Serviço PostgreSQL ativo."
-        {res} == "stopped" => 
+        {res} == "stopped": 
             term.print yellow "PostgreSQL parado. Tentando iniciar..."
             sys.start_service "postgresql"
-        {err} == * => 
-            term.throw "Serviço de banco de dados não encontrado: {err.message}"
+        {err}: term.throw "Serviço de banco de dados não encontrado: {err.message}"
 
-    match net.ping "localhost:{db_port}":
-        {res} >= 200 => term.print green "Porta {db_port} acessível."
-        {res} == * or {err} == * => term.throw "Porta {db_port} está bloqueada ou em uso."
+    ping, hopes = match net.ping "localhost:{port}":
+        {res[0]} < 200: 
+            term.print green "Porta {port} acessível."
+            return {ping}, {hopes}
+        {res[0]} >= 200 or {err}: term.throw "Porta {port} está bloqueada ou em uso."
 
 fn retry name, port, attempts:
     term.print yellow "Tentativa de reconexão: " reset "{attempts} restantes..."
-    call setup {db_name}, {db_port}
+    setup {name}, {port}
 
 fn rollback:
     term.print nl red "Executando Rollback de Banco de Dados..."
-    sys.write "ROLLBACK COMPLETE" -> "{log}/db_recovery.log"
+    sys.write "ROLLBACK COMPLETE" to "{log}/db_recovery.log"
 
 fn recovery:
     term.print nl red "Falha Crítica no módulo DB!"

@@ -1,17 +1,18 @@
 # Instruction Definition eXchange (IDX) [CoffeScript]
 # recipe.idx - Script principal de instalação do pacote "my-package"
 
-idx: 1.2
-allow: [term, sys, net, b2p]
+idx   = 1.2
+allow = term, sys, net, b2p
+
 on_fail: "scripts/fail_script.idx"
 on_interrupt: cancel_install
 
-package: "my-package"
-recipe_version: "1.5.0"
-flavor: "vanilla"
-b2p_requirement: ">=1.31.0"
-target: "b2p"
-kernel: "windows-nt"
+package         = "my-package"
+recipe_version  = "1.5.0"
+flavor          = "vanilla"
+b2p_requirement = ">=1.31.0"
+target          = "b2p"
+kernel          = "windows-nt"
 
 use "scripts/db_setup.idx" as db
 
@@ -22,48 +23,52 @@ const DB_PORT = 5432
 try:
     parallel:
         db.setup port = {DB_PORT}, name = {DB_NAME}
+            into: show_ping
 
         step:
-            extract BIN_URL
+            extract {BIN_URL}
 
             parallel:
                 match sys.version "{b2p.bin}/app.exe":
-                    {res} >= 10.0 => term.print green "Versão detectada:" reset "{res}"
-                    {res} >= 5.0  => term.print yellow "Versão desatualizada: " reset "{res}"
-                    {res} < 5.0   => term.throw "Versão defasada: " gray "{res}"
-                    {err} == 1    => term.throw "Binário corrompido."
-                    {err} == 5    => term.throw "Acesso Negado (UAC)."
-                    {err} == *    => term.throw "Erro Fatal no Binário: {err.message}"
+                    {res} >= 10.0: term.print green "Versão detectada:" reset "{res}"
+                    {res} >= 5.0:  term.print yellow "Versão desatualizada: " reset "{res}"
+                    {res} < 5.0:   term.throw "Versão defasada: " gray "{res}"
+                    {err} == 1:    term.throw "Binário corrompido."
+                    {err} == 5:    term.throw "Acesso Negado (UAC)."
+                    {err}:         term.throw "Erro Fatal no Binário: {err.message}"
                 
-                for plugin in ["auth.dll", "logs.dll"] as parallel:
-                    sys.copy "{sys.TEMP}/{plugin}" -> "{b2p.bin}/plugins/"
+                for plugin in "auth.dll", "logs.dll" as parallel:
+                    sys.copy "{sys.TEMP}/{plugin}" to "{b2p.bin}/plugins/"
 
         step:
             env_type = "prod" if {sys.env} == "production" else "dev"
-            sys.write "Config: 'Value'" -> "{b2p.conf}/{env_type}/settings.ini"
+            sys.write "Config: 'Value'" to "{b2p.conf}/{env_type}/settings.ini"
 
 catch db:
     term.print "Falha no DB: {err.message}"
     db.retry {DB_NAME}, {DB_PORT}, 3
 
 catch sys.copy, sys.write, sys.unzip, sys.move:
-    sys.write "Erro de I/O: {err.message}" -> "{log}/io.log"
+    sys.write "Erro de I/O: {err.message}" to "{log}/io.log"
     term.print nl red "Erro de I/O: {err.message}"
     term.print yellow "Iniciando rollback de arquivos..."
     run "io_rollback.idx"
     exit 1
 
-catch *:
+catch:
     term.print nl red "Erro fatal desconhecido: {err.message}"
     exit 1
 
 fn extract url:
-    net.download url -> "{sys.TEMP}/app.zip"
-    sys.unzip "{sys.TEMP}/app.zip" -> "{sys.TEMP}"
-    sys.move "{sys.TEMP}/app.exe"  -> "{b2p.bin}/app.exe"
+    net.download {url} to "{sys.TEMP}/app.zip"
+    sys.unzip "{sys.TEMP}/app.zip" to "{sys.TEMP}"
+    sys.move "{sys.TEMP}/app.exe"  to "{b2p.bin}/app.exe"
 
 fn cancel_install:
     term.print nl "Instalação cancelada pelo usuário."
     term.print yellow "Rollback iniciado em segundo plano."
     run "io_rollback.idx" as parallel
     exit 0
+
+fn show_ping ping, hopes:
+    term.print "Ping para DB: " cyan "{ping}ms" reset " com " cyan "{hopes} saltos" reset "."
