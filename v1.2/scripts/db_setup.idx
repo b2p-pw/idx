@@ -1,8 +1,8 @@
 # Instruction Definition eXchange (IDX) [CoffeScript]
-# db_setup.idx - Script de configuração do banco de dados
+# db_setup.idx - Script de configuração do banco de dados.
 
 idx   = 1.2
-allow = term, sys, net
+allow = term, sys, net    # Herdado do script que fez a chamada. O pai deve ter as mesmas ou mais permissões.
 
 on_fail: recovery
 
@@ -17,15 +17,23 @@ fn setup name, port:
             sys.start_service "postgresql"
         {err}: term.throw "Serviço de banco de dados não encontrado: {err.message}"
 
+    # Definição de valores de saida do comando, seguido de um "mecth".
+    # Como o comando retorna múltiplos valores, eles são definidos como "{res, 0}" e "{res, 1}",
+    # e/ou variáveis nomeadas, como "{ping}" e "{hopes}".
     ping, hopes = match net.ping "localhost:{port}":
-        {res[0]} < 200: 
+        {res, 0} < 200: 
             term.print green "Porta {port} acessível."
+            # Retorno múltiplos valores.
             return {ping}, {hopes}
-        {res[0]} >= 200 or {err}: term.throw "Porta {port} está bloqueada ou em uso."
+        {res, 0} >= 200 or {err}: term.throw "Porta {port} está bloqueada ou em uso."
 
 fn retry name, port, attempts:
     term.print yellow "Tentativa de reconexão: " reset "{attempts} restantes..."
-    setup {name}, {port}
+    try:
+        setup {name}, {port}
+    catch:
+        if {attempts} > 0: retry {name}, {port}, {attempts} - 1
+        else: term.throw "Falha ao configurar o DB após múltiplas tentativas."
 
 fn rollback:
     term.print nl red "Executando Rollback de Banco de Dados..."

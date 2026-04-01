@@ -1,8 +1,8 @@
 # Instruction Definition eXchange (IDX) [CoffeScript]
-# fail_script.idx - Script de recuperação para falhas críticas
+# fail_script.idx - Script de recuperação para falhas críticas.
 
 idx   = 1.2
-allow = term, sys, net # Herdado do script que fez a chamada.
+allow = term, sys, net    # Herdado do script que fez a chamada. O pai deve ter as mesmas ou mais permissões.
 
 on_fail: fail_handler
 
@@ -16,6 +16,7 @@ parallel:
     run "/io_rollback.idx"
 
     net.post "https://telemetry.com/report":
+        # Uso de bloco de string para formatação avançada, com inclusão de variáveis.
         json: """
         {
             "data": {
