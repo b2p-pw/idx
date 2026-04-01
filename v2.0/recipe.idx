@@ -1,7 +1,7 @@
 # Instruction Definition eXchange (IDX) [CoffeScript]
 # recipe.idx - Script principal de instalação do pacote "my-package".
 
-idx   = 1.2                    # Versão do formato IDX.
+idx   = 2.0                    # Versão do formato IDX.
 allow = term, sys, net, b2p    # Permissões para usar módulos específicos. O pai deve ter as mesmas ou mais permissões.
 
 on_fail: "scripts/fail_script.idx"    # Script a ser executado em caso de falha.
@@ -16,7 +16,7 @@ target          = "b2p"
 kernel          = "windows-nt"
 
 # Importação de scripts auxiliares.
-use "scripts/db_setup.idx" as db 
+use "scripts/db_setup.idx" >= 1.2 as db 
 
 # Definição de constantes para uso no script.
 const BIN_URL = "https://repo.com/app.zip"

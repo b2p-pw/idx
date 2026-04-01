@@ -110,3 +110,7 @@ A IDX utiliza um sistema de **Capacidades Declarativas**. O `allow` do script pr
 ## 7. Caracteres de Escape e Strings
 
 Para utilizar caracteres reservados da sintaxe IDX (como `{}`) como texto literal, utiliza-se a barra invertida (`\`).
+
+``` javascript
+term.print "\{Literal\}"
+```

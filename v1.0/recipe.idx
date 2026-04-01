@@ -58,9 +58,9 @@ cons: CFG_URL = "https://repo.com/setup.conf"
     win.write("Config: 'Value'") > "${b2p:conf}/${env_name}/settings.ini"
     win.permission(path: "${b2p:conf}/${env_name}/config.ini", mode: "read-only")
 
-    for: plugin in plugins
+    for: p in plugins
         then:
-            win.copy(from: "${win:TEMP}/${plugin}", to: "${b2p:bin}/plugins/${plugin}")
+            win.copy(from: "${win:TEMP}/${p}", to: "${b2p:bin}/plugins/${p}")
 
     call: ./notifier.idx; .send_email
 
