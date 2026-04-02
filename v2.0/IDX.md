@@ -108,7 +108,7 @@ A IDX utiliza um sistema de **Capacidades Declarativas**. O `allow` do script pr
 
 ---
 
-## 7. Caracteres de Escape e Strings
+## 7. Caracteres de Escape
 
 Para utilizar caracteres reservados da sintaxe IDX (como `{}`) como texto literal, utiliza-se a barra invertida (`\`).
 
@@ -148,3 +148,64 @@ var = 321                # PASSOU: Tipo compatível.
 var = "456" as number    # PASSOU: Conversão explícita antes da entrada.
 var = "654"              # ERRO:   Tentativa de injetar String em slot Number.
 ```
+
+## 9. Estruturas de Array
+
+A IDX trata coleções de dados como slots de memória que podem ter seu tamanho (Range) e tipo restritos. A sintaxe utiliza a vírgula (`,`) após o identificador para definir o limite máximo de índices.
+
+* **Array Dinâmico (Sem Limite):** O slot aceita qualquer quantidade de itens e qualquer tipo de dado.
+* **Array com Limite (Range):** O slot define um teto máximo de itens. Tentar atribuir mais itens do que o definido resulta em `IndexOverflow`.
+* **Array com Tipo e Limite:** O slot combina a restrição de tamanho com o contrato de tipo.
+
+### Sintaxe de Definição
+
+A ordem de declaração segue a hierarquia: `identificador, limite as tipo`.
+
+| Exemplo | Descrição |
+| :--- | :--- |
+| `var = 1, 2, 3` | Array dinâmico sem restrições. |
+| `var, 5 = "a", "b"` | Array limitado a 5 espaços (Índice 0 a 4). Tipo livre. |
+| `var as number = 10, 20` | Array de tamanho livre, mas restrito ao tipo `number`. |
+| `var, 3 as string = "a", "b"` | Array limitado a 3 espaços e restrito ao tipo `string`. |
+
+Definindo um array com limite de 2 espaços
+
+``` coffescript
+var, 2 = "item1", "item2"
+var = 1, 2                         # PASSOU: Dentro do limite.
+var = "novo1", "novo2", "novo3"    # ERRO:   IndexOverflow (Excedeu 1 espaço).
+```
+
+Definindo um array com limite de 3 espaços e contrato de tipo
+
+``` coffescript
+portas, 3 as number = 80, 443, 8080
+term.print "Primeira porta: {portas, 0}"    # Saida do terminal: 80
+```
+
+#### Regras de Atribuição e Conversão
+
+Ao utilizar o limite junto com o operador `as`, o Core valida primeiro a quantidade de elementos e, em seguida, aplica o contrato de tipo a cada item individualmente.
+
+### Referenciamento e Mutabilidade Dinâmica
+
+A IDX trata a relação entre valores únicos e coleções de forma fluida, permitindo que um slot transite entre estados conforme a necessidade do script, desde que não haja um contrato de tipo restrito.
+
+#### Acesso a Dados (`{var}` vs `{var, n}`)
+
+O acesso via chaves distingue entre o conteúdo total e itens indexados:
+
+* **`{var}`:** Retorna o conteúdo integral do slot. Se for um array, retorna a lista completa.
+* **`{var, n}`:** Retorna o item na posição `n`. Se o slot contiver um valor único, `{var, 0}` retornará o próprio valor.
+
+#### Comportamento de Reatribuição
+
+Em variáveis dinâmicas, o operador de atribuição (`=`) redefine a natureza do slot:
+
+| Sequência de Comandos | Natureza de 'var' | Valor de {var, 0} |
+| :--- | :--- | :--- |
+| `var = 10` | Valor Único (Number) | 10 |
+| `var = 10, 20` | Array Dinâmico | 10 |
+| `var = "texto"` | Valor Único (String) | "texto" |
+
+> **Nota:** Se a variável possuir um limite de índice (ex: `var, 2 = 1, 2`), a tentativa de reatribuir um valor único (`var = 3`) preserva o limite de índice original, mas limpa as posições subsequentes.
