@@ -21,14 +21,14 @@ use "scripts/db_setup.idx" >= 1.2 as db
 # Definição de constantes para uso no script.
 const BIN_URL = "https://repo.com/app.zip"
 const DB_NAME = "users_db"
-const DB_PORT = 5432
+const DB_PORT = "5432"
 
 # Bloco de try-catch para gerenciar erros e garantir a robustez do processos.
 try:
     # Bloco de execção em paralelo para otimizar o processos.
     parallel:
-        db.setup port = {DB_PORT}, name = {DB_NAME}    # Chamada de função de um script importado usando usando valores nomeados.
-            into: show_ping                            # Callback para exibir o ping após a configuração do DB.
+        db.setup port = {DB_PORT} as number, name = {DB_NAME}    # Chamada de função de um script importado usando valores nomeados e convertidos.
+            into: show_ping                                      # Callback para exibir o ping após a configuração do DB.
 
         # Bloco de passos, saido do paralelo para garantir a ordem de execução.
         step:
@@ -61,7 +61,7 @@ try:
 catch db:
     term.print "Falha no DB: {err.message}"
     # Chamada de função de um script importado usando usando valores posicionados.
-    db.retry {DB_NAME}, {DB_PORT}, 3
+    db.retry {DB_NAME}, {DB_PORT} as number, 3
 
 # Bloco de tratamento de erros apenas para as funções "copy", "write", "unzip" e "move".
 catch sys.copy, sys.write, sys.unzip, sys.move:
@@ -77,7 +77,7 @@ catch:
     exit 1
 
 # Definição de função local simples.
-fn extract url:
+fn extract url as string:
     net.download {url} to "{sys.TEMP}/app.zip"
     sys.unzip "{sys.TEMP}/app.zip" to "{sys.TEMP}"
     sys.move "{sys.TEMP}/app.exe"  to "{b2p.bin}/app.exe"
@@ -90,5 +90,5 @@ fn cancel_install:
     exit 0
 
 # Definição de função com entrada multipla.
-fn show_ping ping, hopes:
+fn show_ping ping, hopes as number:
     term.print "Ping para DB: " cyan "{ping}ms" reset " com " cyan "{hopes} saltos" reset "."

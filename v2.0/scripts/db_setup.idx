@@ -7,7 +7,7 @@ version = 1.2
 
 on_fail: recovery
 
-fn setup name, port:
+fn setup name as string, port as number:
     term.print "Iniciando configuração do DB: " cyan "{name}" reset " na porta " cyan "{port}"
     
     match sys.check_service "postgresql":
@@ -28,7 +28,7 @@ fn setup name, port:
             return {ping}, {hopes}
         {res, 0} >= 200 or {err}: term.throw "Porta {port} está bloqueada ou em uso."
 
-fn retry name, port, attempts:
+fn retry name as string, port, attempts as number:
     term.print yellow "Tentativa de reconexão: " reset "{attempts} restantes..."
     try:
         setup {name}, {port}
