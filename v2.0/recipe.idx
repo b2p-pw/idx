@@ -18,17 +18,22 @@ kernel          = "windows-nt"
 # Importação de scripts auxiliares.
 use "scripts/db_setup.idx" >= 1.2 as db 
 
+plugins = "audio.dll", "imgs.dll", "net.dll"
+
 # Definição de constantes para uso no script.
 const BIN_URL = "https://repo.com/app.zip"
 const DB_NAME = "users_db"
-const DB_PORT = 5432
+const DB_PORT = "5432"
 
 # Bloco de try-catch para gerenciar erros e garantir a robustez do processos.
 try:
     # Bloco de execção em paralelo para otimizar o processos.
     parallel:
-        db.setup port = {DB_PORT}, name = {DB_NAME}    # Chamada de função de um script importado usando usando valores nomeados.
-            into: show_ping                            # Callback para exibir o ping após a configuração do DB.
+        db.setup port = {DB_PORT, int}, name = {DB_NAME}    # Chamada de função de um script importado usando usando valores nomeados, e a conversão de string para int.
+            into: show_ping                                 # Pipe para um call para exibir o ping após a configuração do DB.
+
+        # Expanão da lista como argumentos individuais.
+        b2p.register {plugins, *} as parallel
 
         # Bloco de passos, saido do paralelo para garantir a ordem de execução.
         step:
@@ -49,8 +54,8 @@ try:
                     {err}:         term.throw "Erro Fatal no Binário: {err.message}"
                 
                 # Loop percorre um array em execução paralela.
-                for plugin in "auth.dll", "logs.dll" as parallel:
-                    sys.copy "{sys.TEMP}/{plugin}" to "{b2p.bin}/plugins/"
+                for dll in "auth.dll", "logs.dll" as parallel:
+                    sys.copy "{sys.TEMP}/{dll}" to "{b2p.bin_path}/dlls/"
 
         # Outro bloco de passos, que roda em paralelo a chamada de função e ao outro bloco de passos.
         step:
@@ -80,13 +85,17 @@ catch:
 fn extract url:
     net.download {url} to "{sys.TEMP}/app.zip"
     sys.unzip "{sys.TEMP}/app.zip" to "{sys.TEMP}"
-    sys.move "{sys.TEMP}/app.exe"  to "{b2p.bin}/app.exe"
+    sys.move "{sys.TEMP}/app.exe"  to "{b2p.bin_path}/app.exe"
 
 # Definição de função de interrupção.
 fn cancel_install:
     term.print nl "Instalação cancelada pelo usuário."
     term.print yellow "Rollback iniciado em segundo plano."
-    run "io_rollback.idx" as parallel
+    # Chamada de funções de um script sem importação.
+    run "io_rollback.idx" as parallel:
+        do: remove_bin 
+        do: remove_plugins
+        do: remove_config
     exit 0
 
 # Definição de função com entrada multipla.

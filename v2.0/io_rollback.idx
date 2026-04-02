@@ -8,20 +8,14 @@ on_fail: fail_handler
 
 term.print yellow "Iniciando Rollback de I/O..."
 
-if sys.exists "{b2p.bin}/app.exe":
-    term.print "Removendo binário incompleto..."
-    sys.delete "{b2p.bin}/app.exe"
-
-if sys.exists "{b2p.bin}/plugins/":
-    term.print "Limpando diretório de plugins..."
-    sys.delete "{b2p.bin}/plugins/*.dll"
-
 env_type = "prod" if {sys.env} == "production" else "dev"
 ini_path = "{b2p.conf}/{env_type}/settings.ini"
 
-if sys.exists {ini_path}:
-    term.print "Removendo arquivo de configuração instável..."
-    sys.delete {ini_path}
+if sys.exists "{b2p.bin_path}/app.exe": remove_bin
+
+if sys.exists "{b2p.bin_path}/plugins/": remove_plugins
+
+if sys.exists {ini_path}: remove_config
 
 term.print "Limpando arquivos temporários de instalação..."
 sys.delete "{sys.TEMP}/app.zip"
@@ -33,3 +27,15 @@ fn fail_handler:
     term.print red "O sistema pode estar em estado inconsistente."
     term.print red "Rollback Incompleto: {err.message}"
     exit 1
+
+fn remove_bin:
+    term.print "Removendo binário incompleto..."
+    sys.delete "{b2p.bin}/app.exe"
+
+fn remove_plugins:
+    term.print "Limpando diretório de plugins..."
+    sys.delete "{b2p.bin}/plugins/*.dll"
+
+fn remove_config:
+    term.print "Removendo arquivo de configuração instável..."
+    sys.delete {ini_path}
