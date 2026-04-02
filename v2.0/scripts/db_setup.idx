@@ -33,7 +33,7 @@ fn setup name as string, port as number:
 fn retry name as string, port, attempts as number:
     term.print yellow "Tentativa de reconexão: " reset "{attempts} restantes..."
     try:
-        setup {name}, {port, int}
+        setup {name}, {port, number}
     catch:
         if {attempts} > 0: retry {name}, {port}, {attempts} - 1
         else: term.throw "Falha ao configurar o DB após múltiplas tentativas."

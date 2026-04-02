@@ -29,8 +29,8 @@ const DB_PORT = "5432"
 try:
     # Bloco de execção em paralelo para otimizar o processos.
     parallel:
-        db.setup port = {DB_PORT, int}, name = {DB_NAME}    # Chamada de função de um script importado usando valores nomeados e convertidos. 
-            into: show_ping                                 # Pipe para um call para exibir o ping após a configuração do DB.
+        db.setup port = {DB_PORT, number}, name = {DB_NAME}    # Chamada de função de um script importado usando valores nomeados e convertidos. 
+            into: show_ping                                    # Pipe para um call para exibir o ping após a configuração do DB.
 
         # Expanão da lista como argumentos individuais.
         b2p.register {plugins, *} as parallel
