@@ -12,9 +12,7 @@ env_type = "prod" if {sys.env} == "production" else "dev"
 ini_path = "{b2p.conf}/{env_type}/settings.ini"
 
 if sys.exists "{b2p.bin_path}/app.exe": remove_bin
-
 if sys.exists "{b2p.bin_path}/plugins/": remove_plugins
-
 if sys.exists {ini_path}: remove_config
 
 term.print "Limpando arquivos temporários de instalação..."

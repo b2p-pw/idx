@@ -18,10 +18,12 @@ fn setup name as string, port as number:
             sys.start_service "postgresql"
         {err}: term.throw "Serviço de banco de dados não encontrado: {err.message}"
 
-    # Definição de valores de saida do comando, seguido de um "mecth".
-    # Como o comando retorna múltiplos valores, eles são definidos como "{res, 0}" e "{res, 1}",
-    # e/ou variáveis nomeadas, como "{res.ping}" e "{res.hopes}",
-    # ou neste caso como "{p}" e "{h}" definidos por varicaeis internas do script.
+    ###
+    Definição de valores de saida do comando, seguido de um "mecth".
+    Como o comando retorna múltiplos valores, eles são definidos como "{res, 0}" e "{res, 1}",
+    e/ou variáveis nomeadas, como "{res.ping}" e "{res.hopes}",
+    ou neste caso como "{p}" e "{h}" definidos por varicaeis internas do script.
+    ###
     p, h = match net.ping "localhost:{port}":
         {res.ping} >= 200 or {res.hopes} == 0 or {err}:
             term.throw "Porta {port} está bloqueada ou em uso."
