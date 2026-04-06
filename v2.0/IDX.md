@@ -62,9 +62,9 @@ Tratamento granular de códigos de saída ou valores.
 
 ## 4. Módulos e Namespacing
 
-A IDX não executa ações diretamente; ela orquestra módulos importados em `allow`.
+A IDX não executa ações diretamente; ela orquestra módulos importados em `modules`.
 
-* **Sintaxe:** `allow: sys`
+* **Sintaxe:** ` = sys`
 * **Chamada:** `sys.comando argumento`
 
 Diferente do `run`, o `use` carrega um arquivo. Isso permite organizar bibliotecas de funções reutilizáveis.
@@ -92,7 +92,7 @@ on_error: "script.idx"
 
 ## 6. Sistema de Escopos e Segurança
 
-A IDX utiliza um sistema de **Capacidades Declarativas**. O `allow` do script principal dita o que é permitido em todo o fluxo.
+A IDX utiliza um sistema de **Capacidades Declarativas**. O `modules` do script principal dita o que é permitido em todo o fluxo.
 
 ### Hierarquia de Escopo
 
@@ -104,7 +104,7 @@ A IDX utiliza um sistema de **Capacidades Declarativas**. O `allow` do script pr
 * **Princípio do Privilégio Mínimo:** Se o script inicial tem escopo `package`, ele **não pode** chamar um módulo que exija `kernel_admin` a menos que o Core autorize explicitamente via manifesto.
 * **Conflito de Escopo:** Se um script `package` tentar importar um módulo `database`:
     * O Core detecta a elevação de privilégio.
-    * **Ação:** O Runner bloqueia a execução e emite um erro de "Scope Mismatch", a menos que o script pai inclua o escopo secundário: `allow: package, database`.
+    * **Ação:** O Runner bloqueia a execução e emite um erro de "Scope Mismatch", a menos que o script pai inclua o escopo secundário: ` = package, database`.
 
 ---
 

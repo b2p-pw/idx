@@ -1,8 +1,8 @@
 # Instruction Definition eXchange (IDX) [CoffeScript]
 # db_setup.idx - Script de configuração do banco de dados.
 
-idx   = 2.0
-allow = term, sys, net    # Herdado do script que fez a chamada. O pai deve ter as mesmas ou mais permissões.
+idx     = 2.0
+modules = term, sys, net    # Herdado do script que fez a chamada. O pai deve ter as mesmas ou mais permissões.
 version = 1.2
 
 on_fail: recovery

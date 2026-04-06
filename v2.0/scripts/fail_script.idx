@@ -1,8 +1,8 @@
 # Instruction Definition eXchange (IDX) [CoffeScript]
 # fail_script.idx - Script de recuperação para falhas críticas.
 
-idx   = 2.0
-allow = term, sys, net    # Herdado do script que fez a chamada. O pai deve ter as mesmas ou mais permissões.
+idx     = 2.0
+modules = term, sys, net    # Herdado do script que fez a chamada. O pai deve ter as mesmas ou mais permissões.
 
 on_fail: fail_handler
 
