@@ -1,23 +1,24 @@
 # Instruction Definition eXchange (IDX) [CoffeScript]
 # recipe.idx - Script principal de instalação do pacote "my-package".
 
-IDX_VERSION = 2.0                          # Versão do formato IDX. Tudo com o prefixo "IDX" é extrimante exlcusivo do core IDX.
-IDX_MODULES = term, sys, net, b2p, proc    # Permissões para usar módulos específicos. O pai deve ter as mesmas ou mais permissões.
+const IDX_VERSION = 2.0                          # Versão do formato IDX. Tudo com o prefixo "IDX" é extrimante exlcusivo do core IDX.
+const IDX_MODULES = term, sys, net, b2p, proc    # Permissões para usar módulos específicos. O pai deve ter as mesmas ou mais permissões.
 
 on_fail:      run "scripts/fail_script.idx"    # Script a ser executado em caso de falha.
 on_interrupt: cancel_install                   # Função a ser chamada se o usuário interromper o script .
 
 # Metadados do pacote (exemplo especifico de uma receita para o b2p).
-package         = "my-package"
-recipe_version  = "1.5.0"
-flavor          = "vanilla"
-b2p_requirement = ">=1.31.0"
-target          = "b2p"
-kernel          = "windows-nt"
+const PACKAGE         = "my-package"
+const RECIPE_VERSION  = "1.5.0"
+const FLAVOR          = "vanilla"
+const B2P_REQUIREMENT = ">=1.31.0"
+const TARGET          = "b2p"
+const KERNEL          = "windows-nt"
 
 # Importação de scripts auxiliares.
 use "scripts/db_setup.idx" >= 1.2 as db
 
+# Definição de variaveis para uso no script.
 plugins = "audio.dll", "imgs.dll", "net.dll"
 
 # Definição de constantes para uso no script.
