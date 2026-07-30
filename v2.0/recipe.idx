@@ -1,8 +1,8 @@
 # Instruction Definition eXchange (IDX) [CoffeScript]
 # recipe.idx - Script principal de instalação do pacote "my-package".
 
-idx     = 2.0                          # Versão do formato IDX.
-modules = term, sys, net, b2p, proc    # Permissões para usar módulos específicos. O pai deve ter as mesmas ou mais permissões.
+IDX_VERSION = 2.0                          # Versão do formato IDX. Tudo com o prefixo "IDX" é extrimante exlcusivo do core IDX.
+IDX_MODULES = term, sys, net, b2p, proc    # Permissões para usar módulos específicos. O pai deve ter as mesmas ou mais permissões.
 
 on_fail:      run "scripts/fail_script.idx"    # Script a ser executado em caso de falha.
 on_interrupt: cancel_install                   # Função a ser chamada se o usuário interromper o script .
