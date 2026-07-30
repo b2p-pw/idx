@@ -1,8 +1,8 @@
 # Instruction Definition eXchange (IDX) [CoffeScript]
 # io_rollback.idx - Script de rollback para falhas de I/O durante a instalação do "my-package".
 
-IDX_VERSION = 2.0
-IDX_MODULES = term, sys    # Herdado do script que fez a chamada. O pai deve ter as mesmas ou mais permissões.
+const IDX_VERSION = 2.0
+const IDX_MODULES = term, sys    # Herdado do script que fez a chamada. O pai deve ter as mesmas ou mais permissões.
 
 on_fail: fail_handler
 
